@@ -97,12 +97,74 @@ export const SimpleMapScreenshoter = L.Control.extend({
         canvas.width = sW
         canvas.height = sH
         let ctx = canvas.getContext('2d')
+
         let imageData = ctx.createImageData(sW, sH)
-        for (let i = 0; i < pixels.length; ++i) {
-            imageData.data[i] = pixels[i]
+
+        if(this.options.cropImageByInnerWH === true) {
+            let debug = {}
+            let debug2 = {}
+            let emptyYLine = []
+            for (let y = 0; y < sH; ++y) {
+                let emptyCountOnHorizontal = 0
+                for (let x = 0; x < sW; ++x) {
+                    let pixelAtXYOffset = (4 * y * sW) + (4 * x)
+                    // find opacity = 0 on horizontal
+                    if (pixels[pixelAtXYOffset + 4] === 0) {
+                        emptyCountOnHorizontal++
+                    }
+                    if (y === 200) {
+                        debug[x] = pixels.slice(pixelAtXYOffset, pixelAtXYOffset + 4)
+                    }
+                    if (y === 400) {
+                        debug2[x] = pixels.slice(pixelAtXYOffset, pixelAtXYOffset + 4)
+                    }
+                }
+                // save empty horizontal
+                if (emptyCountOnHorizontal === sW) {
+                    emptyYLine.push(y)
+                }
+            }
+            let prev = 0
+            let minY = 0
+            let maxY = sH
+            let findBreak = false
+            emptyYLine.forEach((v, i) => {
+                if (v - 1 === prev) {
+                    if (findBreak === false && i > 0) {
+                        minY = v
+                    }
+                } else if (i > 0) {
+                    findBreak = true
+                    maxY = v
+                }
+                prev = v
+            })
+            console.log('emptyYLine', emptyYLine)
+            console.log('minY', minY, 'maxY', maxY)
+            // console.log('debug', debug)
+            // console.log('debug2', debug2)
+            for (let i = 0; i < pixels.length; ++i) {
+                imageData.data[i] = pixels[i]
+            }
+            ctx.putImageData(imageData, 0, 0)
+
+            let height = maxY - minY
+            let width = sW
+            let cropedCanvas = document.createElement('canvas')
+            let cropedCanvasCtx = cropedCanvas.getContext('2d')
+            cropedCanvas.width = width
+            cropedCanvas.height = height
+
+            cropedCanvasCtx.drawImage(canvas, 0, minY, width, height, 0, 0, width, height)
+            return Promise.resolve(cropedCanvas)
+        } else {
+            for (let i = 0; i < pixels.length; ++i) {
+                imageData.data[i] = pixels[i]
+            }
+
+            ctx.putImageData(imageData, 0, 0)
+            return Promise.resolve(canvas)
         }
-        ctx.putImageData(imageData, 0, 0)
-        return Promise.resolve(canvas)
     },
     /**
      * @param domtoimageOptions

@@ -7,31 +7,31 @@ Used [dom-to-image](https://github.com/tsayen/dom-to-image).
 npm install leaflet-simple-map-screenshoter --save
 ```
 
-### Options
-```
-cropImageByInnerWH: true,
-hidden: false, // hide screen icon
-domtoimageOptions: {}, // options for dom-to-image
-position: 'topleft', // position of take screen icon
-screenName: 'screen', // string or function
-iconInBase64: ICON_SVG_BASE64 // screen icon in base64
-```
-
-### Example
-```
-import 'leaflet-simple-map-screenshoter'
-```
-And click on screnshot icon for save
-
-
-```
+### Usage
+Add save screenshot button to leaflet control panel
+```javascript
 import 'leaflet-simple-map-screenshoter'
 
-this.simpleMapScreenshoter = L.simpleMapScreenshoter({}).addTo(this.map)
-let format = 'blob' // 'image' when return base64, 'canvas' return canvas
+L.simpleMapScreenshoter().addTo(this.map)
+```
+
+For custom usage
+```javascript
+import 'leaflet-simple-map-screenshoter'
+
+let pluginOptions = {
+   cropImageByInnerWH: true, // crop blank opacity from image borders
+   hidden: false, // hide screen icon
+   domtoimageOptions: {}, // see options for dom-to-image
+   position: 'topleft', // position of take screen icon
+   screenName: 'screen', // string or function
+   iconInBase64: ICON_SVG_BASE64 // screen btn icon base64 or url
+}
+this.simpleMapScreenshoter = L.simpleMapScreenshoter(pluginOptions).addTo(this.map)
+let format = 'blob' // 'image' - return base64, 'canvas' - return canvas
 let options = {
-  mimeType: 'image/png' // used if format == image,
-  domtoimageOptions: {} // see options for dom-to-image
+  mimeType: 'image/png', // used if format == image,
+  domtoimageOptions: {} // override dom-to-image options in pluginOptions
 }
 this.simpleMapScreenshoter.takeScreen(format, options).then(blob => {
    alert('done')
@@ -40,5 +40,12 @@ this.simpleMapScreenshoter.takeScreen(format, options).then(blob => {
    console.error(e)
 })
 ```
+
+### Events
+
+simpleMapScreenshoter.click - on leaflet control panel take screen btn click
+simpleMapScreenshoter.takeScreen - start build screenshot
+simpleMapScreenshoter.done - screenshot build ended
+simpleMapScreenshoter.error - on error, return Error instance
 
 
