@@ -1,0 +1,47 @@
+{
+  "name": "leaflet-simple-map-screenshoter",
+  "version": "0.1.0",
+  "description": "Leaflet plugin plugin which take screenshot of map",
+  "main": "dist/bundle.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/grinat/leaflet-simple-map-screenshoter.git"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "prepublish": "npm run build"
+  },
+  "keywords": [
+    "leaflet"
+  ],
+  "author": "Gabdrasitov Rinat <paladin2012gnu@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/grinat/leaflet-simple-map-screenshoter/issues"
+  },
+  "homepage": "https://github.com/grinat/leaflet-simple-map-screenshoter#readme",
+  "dependencies": {
+    "dom-to-image": "^2.6.0"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-eslint": "^8.0.1",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-stage-2": "^6.22.0",
+    "babel-plugin-transform-pipeline": "^0.1.0",
+    "babel-plugin-transform-pipeline-operator": "^7.0.0-beta.3",
+    "babel-plugin-transform-runtime": "^6.22.0",
+    "eslint": "^4.8.0",
+    "eslint-config-standard": "^6.2.1",
+    "eslint-plugin-promise": "^3.4.0",
+    "eslint-plugin-standard": "^2.0.1",
+    "rollup": "^0.41.6",
+    "rollup-plugin-babel": "^2.7.1",
+    "rollup-plugin-commonjs": "^8.0.2",
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-uglify": "^1.0.2",
+    "rollup-watch": "^3.2.2"
+  }
+}
