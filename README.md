@@ -1,5 +1,5 @@
 ## leaflet-simple-map-screenshoter
-[Leaflet](http://www.leafletjs.com) plugin which take screenshot of map.
+[Leaflet](http://www.leafletjs.com) promise based plugin which take screenshot of map.
 Used [dom-to-image](https://github.com/tsayen/dom-to-image).
 
 ### Install

@@ -37,7 +37,6 @@ export const SimpleMapScreenshoter = L.Control.extend({
         if (this.options.hidden === false) {
             this._addScreenBtn()
         }
-        console.log(this.options)
         return this._container
     },
     /**
@@ -47,7 +46,6 @@ export const SimpleMapScreenshoter = L.Control.extend({
      */
     takeScreen (format = 'blob', sreenOptions = {}) {
         const options = {}
-        console.log(sreenOptions)
         for (let opt in this.options) {
             if (sreenOptions.hasOwnProperty(opt)) {
                 options[opt] = sreenOptions[opt]
@@ -55,7 +53,6 @@ export const SimpleMapScreenshoter = L.Control.extend({
                 options[opt] = this.options[opt]
             }
         }
-        console.log(options)
         if (this._screenState.status === STATUS_PENDING) {
             return this._screenState.promise
         }
@@ -130,7 +127,6 @@ export const SimpleMapScreenshoter = L.Control.extend({
      * @private
      */
     _toCanvas (pixels, options) {
-        console.log(options)
         let {captionOffset, caption, captionFontSize, captionFont, captionColor, captionBgColor} = options
         let {screenHeight, screenWidth} = this._node
         let canvas = document.createElement('canvas')
@@ -209,12 +205,12 @@ export const SimpleMapScreenshoter = L.Control.extend({
                 maxY = screenHeight
             }
 
-            /* console.log('emptyYLine', emptyYLine)
+            console.log('emptyYLine', emptyYLine)
             console.log('minMaxY', minMaxY)
             console.log('emptyXLine', emptyXLine)
             console.log('minMaxX', minMaxX)
             console.log('debugX', debugX)
-            console.log('debugY', debugY) */
+            console.log('debugY', debugY)
 
             // if w/h changed, scale inner
             if (minY !== 0 || maxY !== screenHeight || minX !== 0 || maxX !== screenWidth){
@@ -279,7 +275,7 @@ export const SimpleMapScreenshoter = L.Control.extend({
         if (hasBreak === false && arr[0] > 1) {
             min = 0
             max = arr[0]
-            // opaciy at start
+        // opaciy at start
         } else if (hasBreak === false) {
             min = arr[arr.length - 1]
             max = null

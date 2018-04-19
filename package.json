@@ -1,6 +1,6 @@
 {
   "name": "leaflet-simple-map-screenshoter",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Leaflet plugin plugin which take screenshot of map",
   "main": "dist/leaflet-simple-map-screenshoter.js",
   "repository": {
@@ -13,7 +13,10 @@
     "prepublish": "npm run build"
   },
   "keywords": [
-    "leaflet", "map", "screenshot"
+    "leaflet",
+    "map",
+    "screenshot",
+    "image"
   ],
   "author": "Gabdrasitov Rinat <paladin2012gnu@gmail.com>",
   "license": "MIT",

@@ -39,7 +39,8 @@
 <body>
 <div id="mapSimple"></div>
 <div id="map"></div>
-<button id="screenMap">Take screen</button>
+<button id="screenMap">Take and download screen</button>
+<button id="screenMapAndPast">Take screen and past to body</button>
 <script>
 
     var mapSimple = L.map('mapSimple').setView([40, -74], 6);
@@ -73,6 +74,20 @@
             window.URL.revokeObjectURL(url)
         }).catch(e => {
           alert(e.toString())
+        })
+    })
+
+    document.getElementById('screenMapAndPast').addEventListener('click', function () {
+        simpleMapScreenshoter.takeScreen('image', {
+            caption: function () {
+                return 'Hello world'
+            }
+        }).then(image => {
+            var img = document.createElement('img')
+            img.src = image
+            document.body.appendChild(img)
+        }).catch(e => {
+            alert(e.toString())
         })
     })
 </script>
