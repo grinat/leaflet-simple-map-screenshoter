@@ -11,7 +11,7 @@ export const SimpleMapScreenshoter = L.Control.extend({
         domtoimageOptions: {},
         position: 'topleft',
         screenName: 'screen',
-        iconInBase64: ICON_SVG_BASE64
+        iconUrl: ICON_SVG_BASE64
     },
     onAdd () {
         this._container = L.DomUtil.create(
@@ -43,7 +43,8 @@ export const SimpleMapScreenshoter = L.Control.extend({
         }
         this._map.fire('simpleMapScreenshoter.takeScreen')
         this._screenState.status = STATUS_PENDING
-        this._screenState.promise = this._getPixelData(options)
+        this._screenState.promise = this.beforeTakeScreen()
+            .then(() => this._getPixelData(options))
             .then(pixels => this._toCanvas(pixels))
             .then(canvas => {
                 if (format === 'image') {
@@ -53,6 +54,7 @@ export const SimpleMapScreenshoter = L.Control.extend({
                 }
                 return this._canvasToBlob(canvas)
             })
+            .then(image => this.afterTakeScreen(image))
             .then(image => {
                 this._screenState.status = STATUS_READY
                 this._map.fire('simpleMapScreenshoter.done')
@@ -63,6 +65,19 @@ export const SimpleMapScreenshoter = L.Control.extend({
                 return e
             })
         return this._screenState.promise
+    },
+    /**
+     * @returns {Promise<boolean>}
+     */
+    beforeTakeScreen () {
+        return Promise.resolve(true)
+    },
+    /**
+     * @param image
+     * @returns {Promise<Blob>|Promise<Base64>}
+     */
+    afterTakeScreen (image) {
+        return Promise.resolve(image)
     },
     /**
      * @param canvas
@@ -92,79 +107,122 @@ export const SimpleMapScreenshoter = L.Control.extend({
      * @private
      */
     _toCanvas (pixels) {
-        let {sH, sW, cH, cW} = this._node
+        let {screenHeight, screenWidth} = this._node
         let canvas = document.createElement('canvas')
-        canvas.width = sW
-        canvas.height = sH
+        canvas.width = screenWidth
+        canvas.height = screenHeight
+
         let ctx = canvas.getContext('2d')
+        let imageData = ctx.createImageData(screenWidth, screenHeight)
+        for (let i = 0; i < pixels.length; ++i) {
+            imageData.data[i] = pixels[i]
+        }
+        ctx.putImageData(imageData, 0, 0)
+        imageData = null
 
-        let imageData = ctx.createImageData(sW, sH)
+        if (this.options.cropImageByInnerWH === true) {
+            let pixelAtXYOffset = 0
+            let minY = 0
+            let maxY = screenHeight
+            let minX = 0
+            let maxX = screenWidth
 
-        if(this.options.cropImageByInnerWH === true) {
-            let debug = {}
-            let debug2 = {}
+            let debugY = {}
+            let debugX = {}
+
             let emptyYLine = []
-            for (let y = 0; y < sH; ++y) {
-                let emptyCountOnHorizontal = 0
-                for (let x = 0; x < sW; ++x) {
-                    let pixelAtXYOffset = (4 * y * sW) + (4 * x)
+            let emptyCountOnHorizontal = 0
+            for (let y = 0; y < screenHeight; ++y) {
+                emptyCountOnHorizontal = 0
+                for (let x = 0; x < screenWidth; ++x) {
+                    pixelAtXYOffset = (4 * y * screenWidth) + (4 * x)
                     // find opacity = 0 on horizontal
                     if (pixels[pixelAtXYOffset + 4] === 0) {
                         emptyCountOnHorizontal++
                     }
-                    if (y === 200) {
-                        debug[x] = pixels.slice(pixelAtXYOffset, pixelAtXYOffset + 4)
-                    }
-                    if (y === 400) {
-                        debug2[x] = pixels.slice(pixelAtXYOffset, pixelAtXYOffset + 4)
-                    }
+                    /* if (y === Math.round(screenHeight / 2)) {
+                        debugY[x] = pixels.slice(pixelAtXYOffset, pixelAtXYOffset + 4)
+                    } */
                 }
                 // save empty horizontal
-                if (emptyCountOnHorizontal === sW) {
+                if (emptyCountOnHorizontal === screenWidth) {
                     emptyYLine.push(y)
                 }
             }
-            let prev = 0
-            let minY = 0
-            let maxY = sH
-            let findBreak = false
-            emptyYLine.forEach((v, i) => {
-                if (v - 1 === prev) {
-                    if (findBreak === false && i > 0) {
-                        minY = v
+            const minMaxY = this._getMinAndMaxOnValuesBreak(emptyYLine)
+            minY = minMaxY.min
+            maxY = minMaxY.max
+
+            let emptyXLine = []
+            let emptyCountOnVertical = 0
+            for (let x = minX; x < maxX; ++x) {
+                emptyCountOnVertical = 0
+                for (let y = 0; y < screenHeight; ++y) {
+                    pixelAtXYOffset = (4 * y * screenWidth) + (4 * x)
+                    // find opacity = 0 on vertical
+                    if (pixels[pixelAtXYOffset + 4] === 0) {
+                        emptyCountOnVertical++
                     }
-                } else if (i > 0) {
-                    findBreak = true
-                    maxY = v
+
+                    /* if (x === screenWidth - 5) {
+                        debugX[y] = pixels.slice(pixelAtXYOffset, pixelAtXYOffset + 4)
+                    } */
                 }
-                prev = v
-            })
-            console.log('emptyYLine', emptyYLine)
-            console.log('minY', minY, 'maxY', maxY)
-            // console.log('debug', debug)
-            // console.log('debug2', debug2)
-            for (let i = 0; i < pixels.length; ++i) {
-                imageData.data[i] = pixels[i]
+                // save empty vertical
+                if (emptyCountOnVertical === screenHeight) {
+                    emptyXLine.push(x)
+                }
             }
-            ctx.putImageData(imageData, 0, 0)
+            const minMaxX = this._getMinAndMaxOnValuesBreak(emptyXLine)
+            minX = minMaxX.min
+            maxX = minMaxX.max
+
+            /* console.log('emptyYLine', emptyYLine)
+            console.log('minMaxY', minMaxY)
+            console.log('emptyXLine', emptyXLine)
+            console.log('minMaxX', minMaxX)
+            console.log('debugX', debugX)
+            console.log('debugY', debugY) */
 
             let height = maxY - minY
-            let width = sW
+            let width = maxX - minX
             let cropedCanvas = document.createElement('canvas')
             let cropedCanvasCtx = cropedCanvas.getContext('2d')
             cropedCanvas.width = width
             cropedCanvas.height = height
 
-            cropedCanvasCtx.drawImage(canvas, 0, minY, width, height, 0, 0, width, height)
+            cropedCanvasCtx.drawImage(canvas, minX, minY, width, height, 0, 0, width, height)
             return Promise.resolve(cropedCanvas)
-        } else {
-            for (let i = 0; i < pixels.length; ++i) {
-                imageData.data[i] = pixels[i]
-            }
-
-            ctx.putImageData(imageData, 0, 0)
-            return Promise.resolve(canvas)
         }
+
+        return Promise.resolve(canvas)
+    },
+    /**
+     * find break in array [0,1,2,3,40,41,42]
+     * we get 3 and 40
+     * @param arr {Array}
+     * @returns {{min: number, max: number}}
+     * @private
+     */
+    _getMinAndMaxOnValuesBreak (arr) {
+        let min = 0
+        let max = 0
+        let hasBreak = false
+        for (let i = 1; i < arr.length; i++) {
+            if (arr[i] - 1 === arr[i - 1]) {
+                min = arr[i]
+            } else {
+                max = arr[i]
+                hasBreak = true
+                break
+            }
+        }
+        // if on start no opacity, opacity exist on end
+        if (hasBreak === false) {
+            min = 0
+            max = arr[0]
+        }
+        return {min, max}
     },
     /**
      * @param domtoimageOptions
@@ -175,10 +233,8 @@ export const SimpleMapScreenshoter = L.Control.extend({
         const node = this._map.getContainer()
         this._node = {
             node,
-            sH: node.scrollHeight,
-            sW: node.scrollWidth,
-            cH: node.clientHeight,
-            cW: node.clientWidth
+            screenHeight: node.scrollHeight,
+            screenWidth: node.scrollWidth
         }
         return domtoimage.toPixelData(node, domtoimageOptions)
     },
@@ -216,7 +272,7 @@ export const SimpleMapScreenshoter = L.Control.extend({
        color: black;
        overflow: hidden;
        border-radius: 2px;
-       background-image: url('${this.options.iconInBase64}');
+       background-image: url('${this.options.iconUrl}');
        background-position: 46% 41%;
        background-repeat: no-repeat;
        background-size: 63%;
@@ -256,14 +312,4 @@ export const SimpleMapScreenshoter = L.Control.extend({
     }
 })
 
-/**
- * @returns {L.Control.SimpleMapScreenshoter}
- */
-const init = () => {
-    L.Control.SimpleMapScreenshoter = SimpleMapScreenshoter
-    L.simpleMapScreenshoter = function (options) {
-        return new L.Control.SimpleMapScreenshoter(options)
-    }
-}
-
-export default init()
+export default SimpleMapScreenshoter

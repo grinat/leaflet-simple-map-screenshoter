@@ -7,9 +7,14 @@ Used [dom-to-image](https://github.com/tsayen/dom-to-image).
 npm install leaflet-simple-map-screenshoter --save
 ```
 
+### Example
+[Open](https://htmlpreview.github.io/?https://github.com/grinat/leaflet-simple-map-screenshoter/blob/master/examples/index.html) (see in /examples)
+
 ### Usage
 Add save screenshot button to leaflet control panel
 ```javascript
+import 'leaflet'
+// import script after leaflet
 import 'leaflet-simple-map-screenshoter'
 
 L.simpleMapScreenshoter().addTo(this.map)
@@ -17,6 +22,8 @@ L.simpleMapScreenshoter().addTo(this.map)
 
 For custom usage
 ```javascript
+import 'leaflet'
+// import script after leaflet
 import 'leaflet-simple-map-screenshoter'
 
 let pluginOptions = {
@@ -25,7 +32,7 @@ let pluginOptions = {
    domtoimageOptions: {}, // see options for dom-to-image
    position: 'topleft', // position of take screen icon
    screenName: 'screen', // string or function
-   iconInBase64: ICON_SVG_BASE64 // screen btn icon base64 or url
+   iconUrl: ICON_SVG_BASE64 // screen btn icon base64 or url
 }
 this.simpleMapScreenshoter = L.simpleMapScreenshoter(pluginOptions).addTo(this.map)
 let format = 'blob' // 'image' - return base64, 'canvas' - return canvas
@@ -43,9 +50,11 @@ this.simpleMapScreenshoter.takeScreen(format, options).then(blob => {
 
 ### Events
 
+```
 simpleMapScreenshoter.click - on leaflet control panel take screen btn click
 simpleMapScreenshoter.takeScreen - start build screenshot
 simpleMapScreenshoter.done - screenshot build ended
 simpleMapScreenshoter.error - on error, return Error instance
+```
 
 
