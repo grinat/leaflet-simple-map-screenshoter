@@ -14,7 +14,15 @@ export const SimpleMapScreenshoter = L.Control.extend({
         iconUrl: ICON_SVG_BASE64,
         hideElementsWithSelectors: [
             '.leaflet-control-container'
-        ]
+        ],
+        onCropBorderSize: 2,
+        caption: null,
+        captionFontSize: 15,
+        captionFont: 'Arial',
+        captionColor: 'black',
+        captionBgColor: 'white',
+        captionOffset: 5,
+        mimeType: 'image/png'
     },
     onAdd () {
         this._container = L.DomUtil.create(
@@ -29,18 +37,25 @@ export const SimpleMapScreenshoter = L.Control.extend({
         if (this.options.hidden === false) {
             this._addScreenBtn()
         }
+        console.log(this.options)
         return this._container
     },
     /**
      * @param format {string} blob or png
-     * @param options {Object}
+     * @param sreenOptions {Object}
      * @returns {Promise<Blob>|Promise<Base64>} Blob or png image
      */
-    takeScreen (format = 'blob', options = {}) {
-        options = Object.assign(options, {
-            mimeType: 'image/png',
-            domtoimageOptions: this.options.domtoimageOptions
-        })
+    takeScreen (format = 'blob', sreenOptions = {}) {
+        const options = {}
+        console.log(sreenOptions)
+        for (let opt in this.options) {
+            if (sreenOptions.hasOwnProperty(opt)) {
+                options[opt] = sreenOptions[opt]
+            } else {
+                options[opt] = this.options[opt]
+            }
+        }
+        console.log(options)
         if (this._screenState.status === STATUS_PENDING) {
             return this._screenState.promise
         }
@@ -50,7 +65,7 @@ export const SimpleMapScreenshoter = L.Control.extend({
         this._screenState.promise = this._getPixelData(options)
             .then(pixels => {
                 this._setElementsVisible(true)
-                return this._toCanvas(pixels)
+                return this._toCanvas(pixels, options)
             })
             .then(canvas => {
                 if (format === 'image') {
@@ -110,11 +125,14 @@ export const SimpleMapScreenshoter = L.Control.extend({
     },
     /**
      * @param pixels {Uint8Array}
+     * @param options {Object}
      * @returns {Promise<Canvas>}
      * @private
      */
-    _toCanvas (pixels) {
-        let {screenHeight, screenWidth, type} = this._node
+    _toCanvas (pixels, options) {
+        console.log(options)
+        let {captionOffset, caption, captionFontSize, captionFont, captionColor, captionBgColor} = options
+        let {screenHeight, screenWidth} = this._node
         let canvas = document.createElement('canvas')
         canvas.width = screenWidth
         canvas.height = screenHeight
@@ -184,10 +202,10 @@ export const SimpleMapScreenshoter = L.Control.extend({
             minX = minMaxX.min
             maxX = minMaxX.max
 
-            if (minX === 0 && maxX === 0) {
+            if ((minX === 0 && maxX === 0) || maxX === null) {
                 maxX = screenWidth
             }
-            if (minY === 0 && maxY === 0) {
+            if ((minY === 0 && maxY === 0) || maxY === null) {
                 maxY = screenHeight
             }
 
@@ -198,14 +216,40 @@ export const SimpleMapScreenshoter = L.Control.extend({
             console.log('debugX', debugX)
             console.log('debugY', debugY) */
 
+            // if w/h changed, scale inner
+            if (minY !== 0 || maxY !== screenHeight || minX !== 0 || maxX !== screenWidth){
+                minY = minY + this.options.onCropBorderSize
+                maxY = maxY - this.options.onCropBorderSize
+                minX = minX + this.options.onCropBorderSize
+                maxX = maxX - this.options.onCropBorderSize
+            }
             let height = maxY - minY
             let width = maxX - minX
             let cropedCanvas = document.createElement('canvas')
             let cropedCanvasCtx = cropedCanvas.getContext('2d')
             cropedCanvas.width = width
             cropedCanvas.height = height
+            let captionTxt = null
+            if (caption) {
+                captionTxt = typeof caption === 'function'
+                    ? caption.call(this)
+                    : caption
+                cropedCanvas.height = cropedCanvas.height + (captionOffset + captionFontSize + captionOffset)
+            }
+            // set bg color
+            cropedCanvasCtx.beginPath()
+            cropedCanvasCtx.rect(0, 0, cropedCanvas.width, cropedCanvas.height)
+            cropedCanvasCtx.fillStyle = captionBgColor
+            cropedCanvasCtx.fill()
+            cropedCanvasCtx.save()
 
             cropedCanvasCtx.drawImage(canvas, minX, minY, width, height, 0, 0, width, height)
+            if (captionTxt !== null) {
+                cropedCanvasCtx.font = `${captionFontSize}px ${captionFont}`
+                cropedCanvasCtx.fillStyle = captionColor
+                cropedCanvasCtx.fillText(captionTxt, captionOffset, height + captionOffset + captionFontSize)
+            }
+
             return Promise.resolve(cropedCanvas)
         }
 
@@ -231,10 +275,14 @@ export const SimpleMapScreenshoter = L.Control.extend({
                 break
             }
         }
-        // if on start no opacity, opacity exist on end
-        if (hasBreak === false) {
+        // if on start no opacity, opacity may be exist on end
+        if (hasBreak === false && arr[0] > 1) {
             min = 0
             max = arr[0]
+            // opaciy at start
+        } else if (hasBreak === false) {
+            min = arr[arr.length - 1]
+            max = null
         }
         return {min, max}
     },

@@ -34,15 +34,21 @@ let pluginOptions = {
    screenName: 'screen', // string or function
    iconUrl: ICON_SVG_BASE64, // screen btn icon base64 or url
    hideElementsWithSelectors: ['.leaflet-control-container'] // by default hide map controls All els must be child of _map._container
+   mimeType: 'image/png' // used if format == image,
+   caption: null, // streeng or function, added caption to bottom of screen
+   captionFontSize: 15,
+   captionFont: 'Arial',
+   captionColor: 'black',
+   captionBgColor: 'white',
+   captionOffset: 5,
 }
 
 this.simpleMapScreenshoter = L.simpleMapScreenshoter(pluginOptions).addTo(this.map)
 let format = 'blob' // 'image' - return base64, 'canvas' - return canvas
-let options = {
-  mimeType: 'image/png', // used if format == image,
-  domtoimageOptions: {} // override dom-to-image options in pluginOptions
+let overridedPluginOptions = {
+  mimeType: 'image/jpeg'
 }
-this.simpleMapScreenshoter.takeScreen(format, options).then(blob => {
+this.simpleMapScreenshoter.takeScreen(format, overridedPluginOptions).then(blob => {
    alert('done')
    // FileSaver.saveAs(blob, 'screen.png')
 }).catch(e => {

@@ -59,7 +59,11 @@
     }).addTo(map)
 
     document.getElementById('screenMap').addEventListener('click', function () {
-        simpleMapScreenshoter.takeScreen().then(blob => {
+        simpleMapScreenshoter.takeScreen('blob', {
+            caption: function () {
+                return 'Hello world'
+            }
+        }).then(blob => {
             var a = document.createElement('a')
             var url = window.URL.createObjectURL(blob)
             document.body.appendChild(a)
