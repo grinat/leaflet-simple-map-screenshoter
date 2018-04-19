@@ -11,7 +11,10 @@ export const SimpleMapScreenshoter = L.Control.extend({
         domtoimageOptions: {},
         position: 'topleft',
         screenName: 'screen',
-        iconUrl: ICON_SVG_BASE64
+        iconUrl: ICON_SVG_BASE64,
+        hideElementsWithSelectors: [
+            '.leaflet-control-container'
+        ]
     },
     onAdd () {
         this._container = L.DomUtil.create(
@@ -43,9 +46,12 @@ export const SimpleMapScreenshoter = L.Control.extend({
         }
         this._map.fire('simpleMapScreenshoter.takeScreen')
         this._screenState.status = STATUS_PENDING
-        this._screenState.promise = this.beforeTakeScreen()
-            .then(() => this._getPixelData(options))
-            .then(pixels => this._toCanvas(pixels))
+        this._setElementsVisible(false)
+        this._screenState.promise = this._getPixelData(options)
+            .then(pixels => {
+                this._setElementsVisible(true)
+                return this._toCanvas(pixels)
+            })
             .then(canvas => {
                 if (format === 'image') {
                     return this._canvasToImage(canvas, options)
@@ -54,12 +60,12 @@ export const SimpleMapScreenshoter = L.Control.extend({
                 }
                 return this._canvasToBlob(canvas)
             })
-            .then(image => this.afterTakeScreen(image))
             .then(image => {
                 this._screenState.status = STATUS_READY
                 this._map.fire('simpleMapScreenshoter.done')
                 return image
             }).catch(e => {
+                this._setElementsVisible(true)
                 this._screenState.status = STATUS_READY
                 this._map.fire('simpleMapScreenshoter.error', {e})
                 return e
@@ -67,17 +73,18 @@ export const SimpleMapScreenshoter = L.Control.extend({
         return this._screenState.promise
     },
     /**
-     * @returns {Promise<boolean>}
+     * @param isVisible
+     * @private
      */
-    beforeTakeScreen () {
-        return Promise.resolve(true)
-    },
-    /**
-     * @param image
-     * @returns {Promise<Blob>|Promise<Base64>}
-     */
-    afterTakeScreen (image) {
-        return Promise.resolve(image)
+    _setElementsVisible (isVisible = false) {
+        this.options.hideElementsWithSelectors.forEach(selector => {
+            const els = this._map._container.querySelectorAll(selector)
+            for (let el of els) {
+                el.style.opacity = isVisible === false
+                    ? 0
+                    : 1
+            }
+        })
     },
     /**
      * @param canvas
@@ -107,7 +114,7 @@ export const SimpleMapScreenshoter = L.Control.extend({
      * @private
      */
     _toCanvas (pixels) {
-        let {screenHeight, screenWidth} = this._node
+        let {screenHeight, screenWidth, type} = this._node
         let canvas = document.createElement('canvas')
         canvas.width = screenWidth
         canvas.height = screenHeight
@@ -176,6 +183,13 @@ export const SimpleMapScreenshoter = L.Control.extend({
             const minMaxX = this._getMinAndMaxOnValuesBreak(emptyXLine)
             minX = minMaxX.min
             maxX = minMaxX.max
+
+            if (minX === 0 && maxX === 0) {
+                maxX = screenWidth
+            }
+            if (minY === 0 && maxY === 0) {
+                maxY = screenHeight
+            }
 
             /* console.log('emptyYLine', emptyYLine)
             console.log('minMaxY', minMaxY)

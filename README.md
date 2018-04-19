@@ -32,8 +32,10 @@ let pluginOptions = {
    domtoimageOptions: {}, // see options for dom-to-image
    position: 'topleft', // position of take screen icon
    screenName: 'screen', // string or function
-   iconUrl: ICON_SVG_BASE64 // screen btn icon base64 or url
+   iconUrl: ICON_SVG_BASE64, // screen btn icon base64 or url
+   hideElementsWithSelectors: ['.leaflet-control-container'] // by default hide map controls All els must be child of _map._container
 }
+
 this.simpleMapScreenshoter = L.simpleMapScreenshoter(pluginOptions).addTo(this.map)
 let format = 'blob' // 'image' - return base64, 'canvas' - return canvas
 let options = {
