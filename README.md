@@ -8,7 +8,7 @@ npm install leaflet-simple-map-screenshoter --save
 ```
 
 ### Example
-[Open](https://htmlpreview.github.io/?https://github.com/grinat/leaflet-simple-map-screenshoter/blob/master/examples/index.html) (see in /examples)
+[Open](https://github.com/grinat/leaflet-simple-map-screenshoter/blob/master/examples/index.html) (see in /examples)
 
 ### Usage
 Add save screenshot button to leaflet control panel
