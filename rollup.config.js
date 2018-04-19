@@ -16,5 +16,5 @@ export default {
         commonjs()
     ],
     sourceMap: true,
-    dest: 'dist/bundle.js'
+    dest: 'dist/leaflet-simple-map-screenshoter.js'
 }
