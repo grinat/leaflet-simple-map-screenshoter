@@ -44,7 +44,7 @@
 <script>
 
     var mapSimple = L.map('mapSimple').setView([40, -74], 6);
-    L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapSimple);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapSimple);
 
     L.simpleMapScreenshoter({
         screenName: function () {
@@ -54,7 +54,7 @@
 
 
     var map = L.map('map').setView([56, 37], 6);
-    L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
     var simpleMapScreenshoter = L.simpleMapScreenshoter({
         hidden: true
     }).addTo(map)
