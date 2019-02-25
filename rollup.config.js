@@ -14,7 +14,7 @@ export default {
         }),
         uglify({
             compress: {
-                drop_console: true
+                /* drop_console: true */
             }
         }),
         commonjs()

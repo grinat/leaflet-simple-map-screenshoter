@@ -1,5 +1,7 @@
 node_modules/
 npm-debug.log
+tests/e2e/downloads
+tests/out
 
 # Editor directories and files
 .idea

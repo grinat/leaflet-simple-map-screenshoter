@@ -10,11 +10,8 @@ module.exports = {
         browser: true,
     },
     extends: 'standard',
-    plugins: [
-        'html'
-    ],
     'rules': {
-        'indent': ["error", 2],
+        'indent': ["error", 4],
         'arrow-parens': 0,
         'generator-star-spacing': 0,
         'no-debugger': 2
