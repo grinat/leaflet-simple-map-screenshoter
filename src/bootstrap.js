@@ -1,3 +1,4 @@
+/* global L */
 import SimpleMapScreenshoter from './SimpleMapScreenshoter'
 
 /**

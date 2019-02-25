@@ -1,3 +1,4 @@
+/* global L */
 import domtoimage from 'dom-to-image'
 
 export const STATUS_READY = 1
@@ -22,7 +23,8 @@ export const SimpleMapScreenshoter = L.Control.extend({
         captionColor: 'black',
         captionBgColor: 'white',
         captionOffset: 5,
-        mimeType: 'image/png'
+        mimeType: 'image/png',
+        debugMode: false
     },
     onAdd () {
         this._container = L.DomUtil.create(
@@ -80,7 +82,7 @@ export const SimpleMapScreenshoter = L.Control.extend({
                 this._setElementsVisible(true)
                 this._screenState.status = STATUS_READY
                 this._map.fire('simpleMapScreenshoter.error', {e})
-                return e
+                return Promise.reject(e)
             })
         return this._screenState.promise
     },
@@ -106,6 +108,9 @@ export const SimpleMapScreenshoter = L.Control.extend({
      */
     _canvasToImage (canvas, {mimeType}) {
         const image = canvas.toDataURL(mimeType)
+        if (image.indexOf('base64') === -1) {
+            return Promise.reject(new Error('Base64 image generation error'))
+        }
         return Promise.resolve(image)
     },
     /**
@@ -141,11 +146,17 @@ export const SimpleMapScreenshoter = L.Control.extend({
         ctx.putImageData(imageData, 0, 0)
         imageData = null
 
+        let transformedCanvas = document.createElement('canvas')
+        let transformedCanvasCtx = transformedCanvas.getContext('2d')
+        let minY = 0
+        let minX = 0
+        let height = screenHeight
+        let width = screenWidth
+
+        // crop blank opacity from image borders
         if (this.options.cropImageByInnerWH === true) {
             let pixelAtXYOffset = 0
-            let minY = 0
             let maxY = screenHeight
-            let minX = 0
             let maxX = screenWidth
 
             let debugY = {}
@@ -205,12 +216,14 @@ export const SimpleMapScreenshoter = L.Control.extend({
                 maxY = screenHeight
             }
 
-            console.log('emptyYLine', emptyYLine)
-            console.log('minMaxY', minMaxY)
-            console.log('emptyXLine', emptyXLine)
-            console.log('minMaxX', minMaxX)
-            console.log('debugX', debugX)
-            console.log('debugY', debugY)
+            if (this.options.debugMode === true) {
+                console.log('emptyYLine', emptyYLine)
+                console.log('minMaxY', minMaxY)
+                console.log('emptyXLine', emptyXLine)
+                console.log('minMaxX', minMaxX)
+                console.log('debugX', debugX)
+                console.log('debugY', debugY)
+            }
 
             // if w/h changed, scale inner
             if (minY !== 0 || maxY !== screenHeight || minX !== 0 || maxX !== screenWidth){
@@ -219,37 +232,43 @@ export const SimpleMapScreenshoter = L.Control.extend({
                 minX = minX + this.options.onCropBorderSize
                 maxX = maxX - this.options.onCropBorderSize
             }
-            let height = maxY - minY
-            let width = maxX - minX
-            let cropedCanvas = document.createElement('canvas')
-            let cropedCanvasCtx = cropedCanvas.getContext('2d')
-            cropedCanvas.width = width
-            cropedCanvas.height = height
-            let captionTxt = null
-            if (caption) {
-                captionTxt = typeof caption === 'function'
-                    ? caption.call(this)
-                    : caption
-                cropedCanvas.height = cropedCanvas.height + (captionOffset + captionFontSize + captionOffset)
-            }
-            // set bg color
-            cropedCanvasCtx.beginPath()
-            cropedCanvasCtx.rect(0, 0, cropedCanvas.width, cropedCanvas.height)
-            cropedCanvasCtx.fillStyle = captionBgColor
-            cropedCanvasCtx.fill()
-            cropedCanvasCtx.save()
-
-            cropedCanvasCtx.drawImage(canvas, minX, minY, width, height, 0, 0, width, height)
-            if (captionTxt !== null) {
-                cropedCanvasCtx.font = `${captionFontSize}px ${captionFont}`
-                cropedCanvasCtx.fillStyle = captionColor
-                cropedCanvasCtx.fillText(captionTxt, captionOffset, height + captionOffset + captionFontSize)
-            }
-
-            return Promise.resolve(cropedCanvas)
+            height = maxY - minY
+            width = maxX - minX
+            transformedCanvas.width = width
+            transformedCanvas.height = height
+        } else {
+            transformedCanvas.width = width
+            transformedCanvas.height = height
         }
 
-        return Promise.resolve(canvas)
+        let captionTxt = null
+        if (caption) {
+            captionTxt = typeof caption === 'function'
+                ? caption.call(this)
+                : caption
+        }
+
+        // increase size of canvas for write caption
+        if (captionTxt !== null) {
+            transformedCanvas.height = transformedCanvas.height + (captionOffset + captionFontSize + captionOffset)
+            // set bg color
+            transformedCanvasCtx.beginPath()
+            transformedCanvasCtx.rect(0, 0, transformedCanvas.width, transformedCanvas.height)
+            transformedCanvasCtx.fillStyle = captionBgColor
+            transformedCanvasCtx.fill()
+            transformedCanvasCtx.save()
+        }
+
+        transformedCanvasCtx.drawImage(canvas, minX, minY, width, height, 0, 0, width, height)
+
+        // write caption text
+        if (captionTxt !== null) {
+            transformedCanvasCtx.font = `${captionFontSize}px ${captionFont}`
+            transformedCanvasCtx.fillStyle = captionColor
+            transformedCanvasCtx.fillText(captionTxt, captionOffset, height + captionOffset + captionFontSize)
+        }
+
+        return Promise.resolve(transformedCanvas)
     },
     /**
      * find break in array [0,1,2,3,40,41,42]
@@ -275,9 +294,9 @@ export const SimpleMapScreenshoter = L.Control.extend({
         if (hasBreak === false && arr[0] > 1) {
             min = 0
             max = arr[0]
-        // opaciy at start
+            // opaciy at start
         } else if (hasBreak === false) {
-            min = arr[arr.length - 1]
+            min = arr[arr.length - 1] || 0
             max = null
         }
         return {min, max}
@@ -351,7 +370,7 @@ export const SimpleMapScreenshoter = L.Control.extend({
     /**
      * @private
      */
-    _onScreenBtn (event) {
+    _onScreenBtn () {
         this._map.fire('simpleMapScreenshoter.click')
         this.takeScreen().then(blob => {
             let a = document.createElement('a')
@@ -365,7 +384,7 @@ export const SimpleMapScreenshoter = L.Control.extend({
             a.click()
             window.URL.revokeObjectURL(url)
         }).catch(e => {
-            console.error(e)
+            this._map.fire('simpleMapScreenshoter.error', {e})
         })
     }
 })
