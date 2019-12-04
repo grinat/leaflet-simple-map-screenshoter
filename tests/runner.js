@@ -9,6 +9,7 @@ const config = {
     timeout: 60000,
     args: [
         '--no-sandbox',
+        '--disable-setuid-sandbox',
         '--window-size=300,600'
     ]
 }
@@ -21,10 +22,13 @@ before(async () => {
     await new Promise((resolve, reject) => {
         global.server.start(resolve)
     })
-    // detect github actions
-    if (process.env.GITHUB_ACTION) {
+
+    // If running in the Puppeteer Docker container, configure Puppeteer to use
+    // the instance of Google Chrome that is already installed.
+    if (process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD) {
         config.executablePath = 'google-chrome-unstable'
     }
+
     global.browser = await puppeteer.launch(config)
 })
 
