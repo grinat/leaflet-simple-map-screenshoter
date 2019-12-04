@@ -20,6 +20,15 @@ import 'leaflet-simple-map-screenshoter'
 L.simpleMapScreenshoter().addTo(this.map)
 ```
 
+In typescript
+```typescript
+import * as L from 'leaflet'
+// import script after leaflet
+import 'leaflet-simple-map-screenshoter'
+
+(L as any).simpleMapScreenshoter().addTo(this.map)
+```
+
 For custom usage
 ```javascript
 import 'leaflet'
