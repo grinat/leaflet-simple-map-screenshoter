@@ -13,20 +13,20 @@ npm install leaflet-simple-map-screenshoter --save
 ### Usage
 Add save screenshot button to leaflet control panel
 ```javascript
-import 'leaflet'
-// import script after leaflet
-import 'leaflet-simple-map-screenshoter'
-
-L.simpleMapScreenshoter().addTo(this.map)
-```
-
-In typescript
-```typescript
 import * as L from 'leaflet'
 // import script after leaflet
-import 'leaflet-simple-map-screenshoter'
+import {SimpleMapScreenshoter} from 'leaflet-simple-map-screenshoter'
 
-(L as any).simpleMapScreenshoter().addTo(this.map)
+new SimpleMapScreenshoter().addTo(this.map)
+```
+
+From cdn
+```
+<script src="https://unpkg.com/leaflet"></script>
+<script src="https://unpkg.com/leaflet-simple-map-screenshoter"></script>
+<script>
+L.simpleMapScreenshoter().addTo(map)
+</script>
 ```
 
 For custom usage

@@ -1,4 +1,4 @@
-import {Control, ControlPosition} from 'leaflet'
+import {Control, ControlPosition, ErrorEvent} from 'leaflet'
 
 interface PluginOptions extends Object {
   cropImageByInnerWH?: boolean, // crop blank opacity from image borders
@@ -17,8 +17,9 @@ interface PluginOptions extends Object {
   captionOffset?: number,
 }
 
-interface SimpleMapScreenshoter extends Control {
-  takeScreen(format?: 'blob' | 'image' | 'canvas', overridePluginOptions?: PluginOptions): Promise<Blob|Error>;
+export class SimpleMapScreenshoter extends Control {
+  constructor(options?: PluginOptions);
+  takeScreen(format?: 'blob' | 'image' | 'canvas', overridePluginOptions?: PluginOptions): Promise<Blob|Error|ErrorEvent>;
 }
 
 declare module "leaflet" {

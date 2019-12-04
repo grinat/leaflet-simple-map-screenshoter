@@ -12,3 +12,5 @@ const init = () => {
 }
 
 export default init()
+
+export {SimpleMapScreenshoter}
