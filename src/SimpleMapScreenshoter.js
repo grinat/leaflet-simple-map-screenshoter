@@ -308,12 +308,34 @@ export const SimpleMapScreenshoter = L.Control.extend({
      */
     _getPixelData ({domtoimageOptions = {}}) {
         const node = this._map.getContainer()
+
+        // fix: https://github.com/grinat/leaflet-simple-map-screenshoter/issues/7
+        // fix memory out error if map scrollHeight and scrollWidth very big
+        const mapPane = this._map.getPane('mapPane')
+        const increaser = 2 // <-- when window resize, map resize with translate option, we need what for prevent gray on borders
+        mapPane.style.width = `${node.clientWidth * increaser}px`
+        mapPane.style.height = `${node.clientHeight * increaser}px`
+        mapPane.style.overflow = 'hidden'
+
+        const restoreMapPane = () => {
+            mapPane.style.width = 'initial'
+            mapPane.style.height = 'initial'
+            mapPane.style.overflow = 'initial'
+        }
+
         this._node = {
             node,
             screenHeight: node.scrollHeight,
             screenWidth: node.scrollWidth
         }
-        return domtoimage.toPixelData(node, domtoimageOptions)
+
+        return domtoimage.toPixelData(node, domtoimageOptions).then(r => {
+            restoreMapPane()
+            return r
+        }).catch(e => {
+            restoreMapPane()
+            return Promise.reject(e)
+        })
     },
     /**
      * @private

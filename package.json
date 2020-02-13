@@ -1,6 +1,6 @@
 {
   "name": "leaflet-simple-map-screenshoter",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "Leaflet plugin plugin which take screenshot of map",
   "main": "dist/leaflet-simple-map-screenshoter.js",
   "typings": "types/index.d.ts",
@@ -48,7 +48,7 @@
     "mkdirp": "^0.5.1",
     "mocha": "^6.2.2",
     "pixelmatch": "^4.0.2",
-    "puppeteer": "^1.20.0",
+    "puppeteer": "^2.1.1",
     "rollup": "^0.41.6",
     "rollup-plugin-babel": "^2.7.1",
     "rollup-plugin-commonjs": "^8.0.2",
