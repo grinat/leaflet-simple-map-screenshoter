@@ -347,8 +347,6 @@ export const SimpleMapScreenshoter = L.Control.extend({
         mapPane.style.height = `${node.clientHeight * increaser}px`
         mapPane.style.overflow = 'hidden'
 
-        // const [x, y, z] = this._getTranslate3d(mapPane)
-
         const restoreMapPane = () => {
             mapPane.style.width = 'initial'
             mapPane.style.height = 'initial'
@@ -368,30 +366,6 @@ export const SimpleMapScreenshoter = L.Control.extend({
             restoreMapPane()
             return Promise.reject(e)
         })
-    },
-    _setTransformValue (el, val) {
-        el.style[this._getSupportedTransformAttrName(el)] = val
-    },
-    _getTransformValue (el) {
-        return el.style[this._getSupportedTransformAttrName(el)]
-    },
-    _getTranslate3d (el) {
-        const values = this._getTransformValue(el).split(/\w+\(|\);?/)
-        if (!values[1] || !values[1].length) {
-            return [0, 0, 0]
-        }
-        return values[1]
-            .split(/,\s?/g)
-            .map(v => parseInt(v))
-    },
-    _getSupportedTransformAttrName (el) {
-        const transform = ['transform', 'msTransform', 'webkitTransform', 'mozTransform', 'oTransform']
-        for (const attr of transform) {
-            if (el.style[attr]) {
-                return attr
-            }
-        }
-        return transform[0]
     },
     /**
      * @private
