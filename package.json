@@ -1,6 +1,6 @@
 {
   "name": "leaflet-simple-map-screenshoter",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "description": "Leaflet plugin plugin which take screenshot of map",
   "main": "dist/leaflet-simple-map-screenshoter.js",
   "typings": "types/index.d.ts",

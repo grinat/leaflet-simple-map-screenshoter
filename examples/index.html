@@ -72,6 +72,10 @@
         hidden: true
     }).addTo(map)
 
+    // example of markers
+    L.marker([73, -43]).addTo(map).bindPopup('Greenland')
+    L.marker([23.6, 121.5]).addTo(map).bindPopup('China')
+
     // return as blob
     document.getElementById('screenMap').addEventListener('click', function () {
         simpleMapScreenshoter.takeScreen('blob', {
@@ -100,7 +104,7 @@
         }).then(image => {
             var img = document.createElement('img')
             img.src = image
-            document.getElementById('screens').appendChild(img)
+            document.getElementById('screens').prepend(img)
         }).catch(e => {
             alert(e.toString())
         })

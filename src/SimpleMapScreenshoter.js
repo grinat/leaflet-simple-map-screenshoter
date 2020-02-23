@@ -226,7 +226,7 @@ export const SimpleMapScreenshoter = L.Control.extend({
             }
 
             // if w/h changed, scale inner
-            if (minY !== 0 || maxY !== screenHeight || minX !== 0 || maxX !== screenWidth){
+            if (minY !== 0 || maxY !== screenHeight || minX !== 0 || maxX !== screenWidth) {
                 minY = minY + this.options.onCropBorderSize
                 maxY = maxY - this.options.onCropBorderSize
                 minX = minX + this.options.onCropBorderSize
@@ -307,15 +307,47 @@ export const SimpleMapScreenshoter = L.Control.extend({
      * @private
      */
     _getPixelData ({domtoimageOptions = {}}) {
+        /**
+         * 1) we try try to get full map size screen, but we have problem of big canvas:
+         * https://stackoverflow.com/questions/6081483/maximum-size-of-a-canvas-element
+         * ie mobile - 4000
+         * ie - 8000
+         * chrome - 16000
+         * firefox - 32000
+         *
+         * 2) on error, we can create screen with hide not visible elements by css
+         * sometimes it not work, need solution
+         */
+        return this._getPixelDataOfNormalMap(domtoimageOptions).catch(e => {
+            console.warn('May be map size very big on that zoom level, we have error:', e.toString())
+            console.warn('You can manually hide map elements with large distances between them for fix that error')
+            return this._getPixelDataOfBigMap(domtoimageOptions)
+        })
+    },
+    _getPixelDataOfNormalMap (domtoimageOptions = {}) {
+        const node = this._map.getContainer()
+
+        this._node = {
+            node,
+            screenHeight: node.scrollHeight,
+            screenWidth: node.scrollWidth
+        }
+
+        return domtoimage.toPixelData(node, domtoimageOptions)
+    },
+    _getPixelDataOfBigMap (domtoimageOptions = {}) {
         const node = this._map.getContainer()
 
         // fix: https://github.com/grinat/leaflet-simple-map-screenshoter/issues/7
         // fix memory out error if map scrollHeight and scrollWidth very big
         const mapPane = this._map.getPane('mapPane')
+
         const increaser = 2 // <-- when window resize, map resize with translate option, we need what for prevent gray on borders
         mapPane.style.width = `${node.clientWidth * increaser}px`
         mapPane.style.height = `${node.clientHeight * increaser}px`
         mapPane.style.overflow = 'hidden'
+
+        // const [x, y, z] = this._getTranslate3d(mapPane)
 
         const restoreMapPane = () => {
             mapPane.style.width = 'initial'
@@ -336,6 +368,30 @@ export const SimpleMapScreenshoter = L.Control.extend({
             restoreMapPane()
             return Promise.reject(e)
         })
+    },
+    _setTransformValue (el, val) {
+        el.style[this._getSupportedTransformAttrName(el)] = val
+    },
+    _getTransformValue (el) {
+        return el.style[this._getSupportedTransformAttrName(el)]
+    },
+    _getTranslate3d (el) {
+        const values = this._getTransformValue(el).split(/\w+\(|\);?/)
+        if (!values[1] || !values[1].length) {
+            return [0, 0, 0]
+        }
+        return values[1]
+            .split(/,\s?/g)
+            .map(v => parseInt(v))
+    },
+    _getSupportedTransformAttrName (el) {
+        const transform = ['transform', 'msTransform', 'webkitTransform', 'mozTransform', 'oTransform']
+        for (const attr of transform) {
+            if (el.style[attr]) {
+                return attr
+            }
+        }
+        return transform[0]
     },
     /**
      * @private
