@@ -1,6 +1,6 @@
 {
   "name": "leaflet-simple-map-screenshoter",
-  "version": "0.3.9",
+  "version": "0.4.0",
   "description": "Leaflet plugin plugin which take screenshot of map",
   "main": "dist/leaflet-simple-map-screenshoter.js",
   "typings": "types/index.d.ts",
@@ -12,7 +12,8 @@
     "build": "rollup -c",
     "dev": "rollup -c -w",
     "test-e2e": "mocha tests/runner --timeout 60000 --recursive tests/e2e",
-    "test": "npm run build && npm run test-e2e"
+    "test": "npm run build && npm run test-e2e",
+    "server": "node server.js"
   },
   "keywords": [
     "leaflet",
@@ -27,10 +28,12 @@
   },
   "homepage": "https://github.com/grinat/leaflet-simple-map-screenshoter#readme",
   "dependencies": {
-    "@types/leaflet": "^1.5.6",
-    "dom-to-image": "^2.6.0"
+    "dom-to-image": "^2.6.0",
+    "file-saver": "^2.0.2"
   },
   "devDependencies": {
+    "@types/express": "^4.17.2",
+    "@types/leaflet": "^1.5.9",
     "babel-core": "^6.26.0",
     "babel-eslint": "^8.0.1",
     "babel-plugin-external-helpers": "^6.22.0",
@@ -45,6 +48,8 @@
     "eslint-config-standard": "^6.2.1",
     "eslint-plugin-promise": "^3.4.0",
     "eslint-plugin-standard": "^2.0.1",
+    "express": "^4.17.1",
+    "ip": "^1.1.5",
     "mkdirp": "^0.5.1",
     "mocha": "^6.2.2",
     "pixelmatch": "^4.0.2",

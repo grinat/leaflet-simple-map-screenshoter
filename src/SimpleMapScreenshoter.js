@@ -1,5 +1,6 @@
 /* global L */
 import domtoimage from 'dom-to-image'
+import fileSaver from 'file-saver'
 
 export const STATUS_READY = 1
 export const STATUS_PENDING = 2
@@ -156,8 +157,6 @@ export const SimpleMapScreenshoter = L.Control.extend({
         // crop blank opacity from image borders
         if (this.options.cropImageByInnerWH === true) {
             let pixelAtXYOffset = 0
-            let maxY = screenHeight
-            let maxX = screenWidth
 
             let debugY = {}
             let debugX = {}
@@ -183,7 +182,8 @@ export const SimpleMapScreenshoter = L.Control.extend({
             }
             const minMaxY = this._getMinAndMaxOnValuesBreak(emptyYLine)
             minY = minMaxY.min
-            maxY = minMaxY.max
+            let maxX = screenWidth
+            let maxY = minMaxY.max
 
             let emptyXLine = []
             let emptyCountOnVertical = 0
@@ -320,7 +320,7 @@ export const SimpleMapScreenshoter = L.Control.extend({
          */
         return this._getPixelDataOfNormalMap(domtoimageOptions).catch(e => {
             console.warn('May be map size very big on that zoom level, we have error:', e.toString())
-            console.warn('You can manually hide map elements with large distances between them for fix that error')
+            console.warn('You can manually hide map elements with large distances between them for fix that warn')
             return this._getPixelDataOfBigMap(domtoimageOptions)
         })
     },
@@ -425,16 +425,11 @@ export const SimpleMapScreenshoter = L.Control.extend({
     _onScreenBtn () {
         this._map.fire('simpleMapScreenshoter.click')
         this.takeScreen().then(blob => {
-            let a = document.createElement('a')
-            let url = window.URL.createObjectURL(blob)
-            document.body.appendChild(a)
-            a.href = url
             const screenName = typeof this.options.screenName === 'function'
                 ? this.options.screenName.call(this)
                 : this.options.screenName
-            a.download = `${screenName}.png`
-            a.click()
-            window.URL.revokeObjectURL(url)
+
+            fileSaver.saveAs(blob, `${screenName}.png`)
         }).catch(e => {
             this._map.fire('simpleMapScreenshoter.error', {e})
         })
