@@ -3,6 +3,7 @@ import {Control, ControlPosition, ErrorEvent} from 'leaflet'
 interface PluginOptions extends Object {
   cropImageByInnerWH?: boolean, // crop blank opacity from image borders
   hidden?: boolean, // hide screen icon
+  preventDownload?: boolean, // prevent download on button click
   domtoimageOptions?: any, // see options for dom-to-image
   position?: ControlPosition, // position of take screen icon
   screenName?: string | (() => string), // string or function

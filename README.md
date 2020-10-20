@@ -21,7 +21,7 @@ new SimpleMapScreenshoter().addTo(this.map)
 ```
 
 From cdn
-```
+```html
 <script src="https://unpkg.com/leaflet"></script>
 <script src="https://unpkg.com/leaflet-simple-map-screenshoter"></script>
 <script>
@@ -38,13 +38,14 @@ import 'leaflet-simple-map-screenshoter'
 let pluginOptions = {
    cropImageByInnerWH: true, // crop blank opacity from image borders
    hidden: false, // hide screen icon
+   preventDownload: false, // prevent download on button click
    domtoimageOptions: {}, // see options for dom-to-image
    position: 'topleft', // position of take screen icon
    screenName: 'screen', // string or function
    iconUrl: ICON_SVG_BASE64, // screen btn icon base64 or url
    hideElementsWithSelectors: ['.leaflet-control-container'] // by default hide map controls All els must be child of _map._container
    mimeType: 'image/png' // used if format == image,
-   caption: null, // streeng or function, added caption to bottom of screen
+   caption: null, // string or function, added caption to bottom of screen
    captionFontSize: 15,
    captionFont: 'Arial',
    captionColor: 'black',

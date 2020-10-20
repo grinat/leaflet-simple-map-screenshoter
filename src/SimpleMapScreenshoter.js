@@ -25,7 +25,8 @@ export const SimpleMapScreenshoter = L.Control.extend({
         captionBgColor: 'white',
         captionOffset: 5,
         mimeType: 'image/png',
-        debugMode: false
+        debugMode: false,
+        preventDownload: false
     },
     onAdd () {
         this._container = L.DomUtil.create(
@@ -424,6 +425,8 @@ export const SimpleMapScreenshoter = L.Control.extend({
      */
     _onScreenBtn () {
         this._map.fire('simpleMapScreenshoter.click')
+        if (this.options.preventDownload) return
+
         this.takeScreen().then(blob => {
             const screenName = typeof this.options.screenName === 'function'
                 ? this.options.screenName.call(this)
