@@ -1,5 +1,5 @@
 /* global L */
-import domtoimage from 'dom-to-image'
+import domtoimage from 'dom-to-image-more'
 import fileSaver from 'file-saver'
 
 export const STATUS_READY = 1
