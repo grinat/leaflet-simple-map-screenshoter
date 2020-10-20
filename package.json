@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/grinat/leaflet-simple-map-screenshoter#readme",
   "dependencies": {
-    "dom-to-image": "^2.6.0",
+    "dom-to-image-more": "^2.8.0",
     "file-saver": "^2.0.2"
   },
   "devDependencies": {
