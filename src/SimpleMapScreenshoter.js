@@ -26,7 +26,21 @@ export const SimpleMapScreenshoter = L.Control.extend({
         captionOffset: 5,
         mimeType: 'image/png',
         debugMode: false,
-        preventDownload: false
+        preventDownload: false,
+        onPixelDataFail: function ({ node, error }) {
+            console.warn(`Map node is very big ${node.scrollWidth}x${node.scrollHeight}`)
+            console.warn(`Add function: SimpleMapScreenshoter({
+              onPixelDataFail: function({ node, plugin, error, mapPane, domtoimageOptions }) {
+                 // Solutions:
+                 // decrease size of map
+                 // or decrease zoom level
+                 // or remove elements with big distanses
+                 // and after that return image in Promise - plugin._getPixelDataOfNormalMap
+                 return plugin._getPixelDataOfNormalMap(domtoimageOptions)
+              }
+            })`)
+            return Promise.reject(error)
+        }
     },
     onAdd () {
         this._container = L.DomUtil.create(
@@ -365,7 +379,13 @@ export const SimpleMapScreenshoter = L.Control.extend({
             return r
         }).catch(e => {
             restoreMapPane()
-            return Promise.reject(e)
+            return this.options.onPixelDataFail({
+                plugin: this,
+                node,
+                mapPane,
+                error: e,
+                domtoimageOptions
+            })
         })
     },
     /**
