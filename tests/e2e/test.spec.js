@@ -9,7 +9,7 @@ describe('test', async () => {
     before(async () => {
         page = await browser.newPage()
         await page.goto('http://localhost:8080/examples/index.html')
-        await page.setViewport({ width: 1200, height: 600 })
+        await page.screenshot({path: 'tests/out/page-screenshot.png'})
     })
 
     after(async () => {

@@ -11,7 +11,8 @@ const config = {
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--window-size=1200,600'
-    ]
+    ],
+    defaultViewport: null
 }
 
 before(async () => {
