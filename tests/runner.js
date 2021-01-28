@@ -10,7 +10,7 @@ const config = {
     args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
-        '--window-size=300,600'
+        '--window-size=1200,600'
     ]
 }
 

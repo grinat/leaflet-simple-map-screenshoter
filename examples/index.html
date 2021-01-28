@@ -21,9 +21,16 @@
             justify-content: space-around;
         }
 
-        .maps > div > div {
-            display: block;
+        .maps > div {
+            border: 1px solid #939393;
             margin: 10px;
+            padding: 10px;
+            border-radius: 15px;
+            max-width: 300px;
+        }
+
+        .maps .leaflet-container {
+            display: block;
             height: 300px;
             width: 300px;
         }
@@ -31,88 +38,129 @@
 </head>
 
 <body>
-<div id="mapsScreeningState"></div>
 <div class="maps">
     <div>
+        <h3>Simple example</h3>
         <div id="mapSimple"></div>
+        <div id="mapSimpleScreeningState"></div>
+        <script>
+            // init map
+            var mapSimple = L.map('mapSimple').setView([40, -74], 2);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapSimple);
+
+            // init plugin
+            L.simpleMapScreenshoter().addTo(mapSimple)
+
+            // optional: add screening state info
+            mapSimple.on('simpleMapScreenshoter.takeScreen', function () {
+                document.getElementById('mapSimpleScreeningState').innerHTML += 'screening...<br>'
+            })
+            mapSimple.on('simpleMapScreenshoter.done', function () {
+                document.getElementById('mapSimpleScreeningState').innerHTML += 'screen end...<br>'
+            })
+            mapSimple.on('simpleMapScreenshoter.error', function (event) {
+                console.error(event.e)
+                document.getElementById('mapSimpleScreeningState').innerHTML += event.e.toString() + '<br>'
+            })
+        </script>
     </div>
+
     <div>
+        <h3>Simple example with elements with long distances</h3>
+        <div id="mapBig"></div>
+        <div id="mapBigScreeningState"></div>
+        <script>
+            // init map
+            var mapBig = L.map('mapBig').setView([40, -74], 7);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
+                .addTo(mapBig);
+            L.marker([40, -74]).addTo(mapBig);
+            L.marker([51.503, -0.06]).addTo(mapBig);
+            L.marker([20, -20]).addTo(mapBig);
+            L.polygon([
+                [40, -74],
+                [51.503, -0.06],
+                [20, -20]
+            ]).addTo(mapBig);
+
+            // add plugin
+            L.simpleMapScreenshoter({
+                // custom screenshot name
+                screenName: function () {
+                    return new Date().toDateString()
+                }
+            }).addTo(mapBig);
+
+            // show screening progress
+            mapBig.on('simpleMapScreenshoter.takeScreen', function () {
+                document.getElementById('mapBigScreeningState').innerHTML = 'screening...<br>'
+            })
+            mapBig.on('simpleMapScreenshoter.done', function () {
+                document.getElementById('mapBigScreeningState').innerHTML = 'screen end...<br>'
+            })
+            mapBig.on('simpleMapScreenshoter.error', function (event) {
+                console.error(event.e)
+                document.getElementById('mapBigScreeningState').innerHTML = event.e.toString() + '<br>'
+            })
+        </script>
+    </div>
+
+    <div>
+        <h3>Advanced example<h3>
         <div id="map"></div>
         <button id="screenMap">Take and download screen</button>
         <button id="screenMapAndPast">Take screen and past to body</button>
         <div id="screens"></div>
+        <script>
+            // init map
+            var map = L.map('map').setView([56, 37], 2);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            L.marker([73, -43]).addTo(map).bindPopup('Greenland')
+            L.marker([23.6, 121.5]).addTo(map).bindPopup('China')
+
+            // init plugin
+            var simpleMapScreenshoter = L.simpleMapScreenshoter({
+                hidden: true, // hide screen btn on map
+            }).addTo(map)
+
+            // return as blob
+            document.getElementById('screenMap').addEventListener('click', function () {
+                simpleMapScreenshoter.takeScreen('blob', {
+                    caption: function () {
+                        return 'Hello world'
+                    }
+                }).then(blob => {
+                    saveAs(blob, 'screen.png')
+                }).catch(e => {
+                    alert(e.toString())
+                })
+            })
+
+            // return as image
+            document.getElementById('screenMapAndPast').addEventListener('click', function () {
+                simpleMapScreenshoter.takeScreen('image', {
+                    caption: function () {
+                        return 'Hello world'
+                    }
+                }).then(image => {
+                    var img = document.createElement('img')
+                    img.src = image
+                    document.getElementById('screens').prepend(img)
+                }).catch(e => {
+                    alert(e.toString())
+                })
+            })
+
+            // listen on fired error or catch error in prev promise
+            map.on('simpleMapScreenshoter.error', function (event) {
+                var el = document.createElement('div')
+                el.classList.add('create-screen-error')
+                el.innerHTML = event.e.toString()
+                document.getElementById('screens').appendChild(el)
+            })
+        </script>
     </div>
 </div>
-<script>
-    /* show screen btn in panel */
-    var mapSimple = L.map('mapSimple').setView([40, -74], 2);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapSimple);
-
-    L.simpleMapScreenshoter({
-        screenName: function () {
-            return new Date().toDateString()
-        }
-    }).addTo(mapSimple)
-
-    // add loaders
-    mapSimple.on('simpleMapScreenshoter.takeScreen', function () {
-        document.getElementById('mapsScreeningState').innerHTML += 'screening...<br>'
-    })
-    mapSimple.on('simpleMapScreenshoter.done', function () {
-        document.getElementById('mapsScreeningState').innerHTML += 'screen end...<br>'
-    })
-    mapSimple.on('simpleMapScreenshoter.error', function (event) {
-        console.error(event.e)
-        document.getElementById('mapsScreeningState').innerHTML += event.e.toString() + '<br>'
-    })
-
-    /* custom usage */
-    var map = L.map('map').setView([56, 37], 2);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-    var simpleMapScreenshoter = L.simpleMapScreenshoter({
-        hidden: true
-    }).addTo(map)
-
-    // example of markers
-    L.marker([73, -43]).addTo(map).bindPopup('Greenland')
-    L.marker([23.6, 121.5]).addTo(map).bindPopup('China')
-
-    // return as blob
-    document.getElementById('screenMap').addEventListener('click', function () {
-        simpleMapScreenshoter.takeScreen('blob', {
-            caption: function () {
-                return 'Hello world'
-            }
-        }).then(blob => {
-            saveAs(blob, 'screen.png')
-        }).catch(e => {
-          alert(e.toString())
-        })
-    })
-
-    // return as image
-    document.getElementById('screenMapAndPast').addEventListener('click', function () {
-        simpleMapScreenshoter.takeScreen('image', {
-            caption: function () {
-                return 'Hello world'
-            }
-        }).then(image => {
-            var img = document.createElement('img')
-            img.src = image
-            document.getElementById('screens').prepend(img)
-        }).catch(e => {
-            alert(e.toString())
-        })
-    })
-
-    // listen on fired error or catch error in prev promise
-    map.on('simpleMapScreenshoter.error', function (event) {
-        var el = document.createElement('div')
-        el.classList.add('create-screen-error')
-        el.innerHTML = event.e.toString()
-        document.getElementById('screens').appendChild(el)
-    })
-</script>
 </body>
 
 </html>
