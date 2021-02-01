@@ -379,13 +379,19 @@ export const SimpleMapScreenshoter = L.Control.extend({
             return r
         }).catch(e => {
             restoreMapPane()
-            return this.options.onPixelDataFail({
-                plugin: this,
-                node,
-                mapPane,
-                error: e,
-                domtoimageOptions
-            })
+
+            // 4000 - max canvas size on ie mobile
+            if (node.scrollHeight >= 4000 || node.scrollWidth >= 4000) {
+                return this.options.onPixelDataFail({
+                    plugin: this,
+                    node,
+                    mapPane,
+                    error: e,
+                    domtoimageOptions
+                })
+            }
+
+            return Promise.reject(e)
         })
     },
     /**
