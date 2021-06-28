@@ -88,7 +88,7 @@ export const SimpleMapScreenshoter = L.Control.extend({
                 } else if (format === 'canvas') {
                     return canvas
                 }
-                return this._canvasToBlob(canvas)
+                return this._canvasToBlob(canvas, options)
             })
             .then(image => {
                 this._screenState.status = STATUS_READY
@@ -134,11 +134,11 @@ export const SimpleMapScreenshoter = L.Control.extend({
      * @returns {Promise<Blob>}
      * @private
      */
-    _canvasToBlob (canvas) {
+    _canvasToBlob (canvas, {mimeType}) {
         return new Promise((resolve, reject) => {
             canvas.toBlob(blob => {
                 resolve(blob)
-            }, 'image/png')
+            }, mimeType)
         })
     },
     /**
