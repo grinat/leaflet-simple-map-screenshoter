@@ -55,6 +55,16 @@ export const SimpleMapScreenshoter = L.Control.extend({
         if (this.options.hidden === false) {
             this._addScreenBtn()
         }
+
+        this._onUserStartInteractWithMap = this._onUserStartInteractWithMap.bind(this)
+        this._onUserEndInteractWithMap = this._onUserEndInteractWithMap.bind(this)
+
+        this._map.on('zoomstart', this._onUserStartInteractWithMap)
+        this._map.on('move', this._onUserStartInteractWithMap)
+
+        this._map.on('zoomend', this._onUserEndInteractWithMap)
+        this._map.on('moveend', this._onUserEndInteractWithMap)
+
         return this._container
     },
     /**
@@ -77,7 +87,8 @@ export const SimpleMapScreenshoter = L.Control.extend({
         this._map.fire('simpleMapScreenshoter.takeScreen')
         this._screenState.status = STATUS_PENDING
         this._setElementsVisible(false)
-        this._screenState.promise = this._getPixelData(options)
+        this._screenState.promise = this._waitEndOfInteractions()
+            .then(() => this._getPixelData(options))
             .then(pixels => {
                 this._setElementsVisible(true)
                 return this._toCanvas(pixels, options)
@@ -461,6 +472,22 @@ export const SimpleMapScreenshoter = L.Control.extend({
             fileSaver.saveAs(blob, `${screenName}.png`)
         }).catch(e => {
             this._map.fire('simpleMapScreenshoter.error', {e})
+        })
+    },
+    _onUserStartInteractWithMap () {
+        this._interaction = true
+    },
+    _onUserEndInteractWithMap () {
+        this._interaction = false
+    },
+    _waitEndOfInteractions () {
+        return new Promise(resolve => {
+            const interval = setInterval(() => {
+                if (!this._interaction) {
+                    resolve()
+                    clearInterval(interval)
+                }
+            }, 100)
         })
     }
 })
