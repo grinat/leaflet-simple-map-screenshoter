@@ -1,6 +1,6 @@
 {
   "name": "leaflet-simple-map-screenshoter",
-  "version": "0.4.5",
+  "version": "0.5.0",
   "description": "Leaflet plugin plugin which take screenshot of map",
   "main": "dist/leaflet-simple-map-screenshoter.js",
   "typings": "types/index.d.ts",
@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/grinat/leaflet-simple-map-screenshoter#readme",
   "dependencies": {
-    "dom-to-image-more": "^2.8.0",
+    "dom-to-image-more": "^2.12.0",
     "file-saver": "^2.0.2"
   },
   "devDependencies": {
@@ -42,7 +42,7 @@
     "babel-plugin-transform-runtime": "^6.22.0",
     "babel-preset-env": "^1.6.0",
     "babel-preset-stage-2": "^6.22.0",
-    "canvas": "^2.6.1",
+    "canvas": "^2.10.2",
     "chai": "^4.2.0",
     "eslint": "^4.8.0",
     "eslint-config-standard": "^6.2.1",
@@ -53,12 +53,12 @@
     "mkdirp": "^0.5.1",
     "mocha": "^9.0.1",
     "pixelmatch": "^4.0.2",
-    "puppeteer": "^2.1.1",
+    "puppeteer": "^13.7.0",
     "rollup": "^0.41.6",
     "rollup-plugin-babel": "^2.7.1",
     "rollup-plugin-commonjs": "^8.0.2",
     "rollup-plugin-node-resolve": "^3.0.0",
-    "rollup-plugin-uglify": "^1.0.2",
+    "rollup-plugin-uglify": "^3.0.0",
     "rollup-watch": "^3.2.2",
     "static-server": "^2.2.1",
     "uuid": "^3.3.2"
