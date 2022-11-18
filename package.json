@@ -44,7 +44,7 @@
     "babel-preset-stage-2": "^6.22.0",
     "canvas": "^2.10.2",
     "chai": "^4.2.0",
-    "eslint": "^4.8.0",
+    "eslint": "^8.27.0",
     "eslint-config-standard": "^6.2.1",
     "eslint-plugin-promise": "^3.4.0",
     "eslint-plugin-standard": "^2.0.1",
