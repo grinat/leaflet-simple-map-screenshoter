@@ -27,6 +27,7 @@ export const SimpleMapScreenshoter = L.Control.extend({
         mimeType: 'image/png',
         debugMode: false,
         preventDownload: false,
+        waitInterval: 100,
         onPixelDataFail: function ({ node, error }) {
             console.warn(`Map node is very big ${node.scrollWidth}x${node.scrollHeight}`)
             console.warn(`Add function: SimpleMapScreenshoter({
@@ -487,7 +488,7 @@ export const SimpleMapScreenshoter = L.Control.extend({
                     resolve()
                     clearInterval(interval)
                 }
-            }, 100)
+            }, this.options.waitInterval)
         })
     }
 })
